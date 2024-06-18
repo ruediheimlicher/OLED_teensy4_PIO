@@ -61,6 +61,8 @@
 // Please update the pin numbers according to your setup. Use U8X8_PIN_NONE if the reset pin is not connected
 //U8G2_NULL u8g2(U8G2_R0);  // null device, a 8x8 pixel display which does nothing
 //U8G2_SSD1327_WS_128X128_1_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 10, /* dc=*/ 9, /* reset=*/ 8);
+
+// full buffer
 U8G2_SSD1327_WS_128X128_F_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 10, /* dc=*/ 9, /* reset=*/ 8);
 
 
