@@ -106,9 +106,10 @@ void loop(void)
      loopcounter1++;
     if (loopcounter1 == 0x1F)
     {
+      loopcounter1 = 0;
       u8g2.firstPage();
       digitalWriteFast(23,!(digitalRead(23)));
-      loopcounter1 = 0;
+      
       wertcounter++;
       if(wertcounter%2==0)
       {
