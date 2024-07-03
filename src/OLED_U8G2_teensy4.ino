@@ -104,6 +104,31 @@ ADC *adc = new ADC(); // adc object
 
 #define CLOCKSPEED 4000000
 
+void setADC0(uint8_t avrg, uint8_t res)
+{
+  adc->adc0->setAveraging(avrg); // set number of averages
+  adc->adc0->setResolution(res); // set bits of resolution
+  adc->adc0->setConversionSpeed(ADC_CONVERSION_SPEED::MED_SPEED); // change the conversion speed
+  adc->adc0->setSamplingSpeed(ADC_SAMPLING_SPEED::MED_SPEED); // change the sampling speed
+  adc->adc0->recalibrate();
+  adc->adc0->setReference(ADC_REFERENCE::REF_3V3);
+
+}
+
+void SPI_out2data(uint8_t data0,uint8_t data1)
+{
+   SPI.beginTransaction(SPISettings(CLOCKSPEED, MSBFIRST, SPI_MODE0));
+      digitalWriteFast(SS,LOW);
+      SPI.transfer(data0);
+      digitalWriteFast(SS,HIGH);
+      _delay_us(2);
+      digitalWriteFast(SS,LOW);
+      SPI.transfer(data1);
+      digitalWriteFast(SS,HIGH);
+      SPI.endTransaction();
+
+}
+
 void setup(void) 
 {
   pinMode(23,OUTPUT);
@@ -121,13 +146,15 @@ void setup(void)
   out_data[6] = 103;
 
   // ADC
+  /*
   adc->adc0->setAveraging(2); // set number of averages
   adc->adc0->setResolution(8); // set bits of resolution
   adc->adc0->setConversionSpeed(ADC_CONVERSION_SPEED::LOW_SPEED); // change the conversion speed
   adc->adc0->setSamplingSpeed(ADC_SAMPLING_SPEED::MED_SPEED); // change the sampling speed
   adc->adc0->recalibrate();
   adc->adc0->setReference(ADC_REFERENCE::REF_3V3);
-  
+  */
+  setADC0(2,8);
   /*
   u8g2.begin();
   u8g2.setFont(u8g2_font_helvB12_tr);
@@ -174,17 +201,8 @@ void loop(void)
 
       paketnummer = transferindex%4; // pos im paket 01 23 45 67
 
-      SPI.beginTransaction(SPISettings(CLOCKSPEED, MSBFIRST, SPI_MODE0));
-      digitalWriteFast(SS,LOW);
-      SPI.transfer(out_data[2*paketnummer]);
-      digitalWriteFast(SS,HIGH);
-      _delay_us(10);
-      digitalWriteFast(SS,LOW);
-      SPI.transfer(out_data[2*paketnummer+1]);
-      digitalWriteFast(SS,HIGH);
-      SPI.endTransaction();
-
-
+      SPI_out2data(out_data[2*paketnummer],out_data[2*paketnummer+1]);
+      
 
       transferindex++;
       /*   
