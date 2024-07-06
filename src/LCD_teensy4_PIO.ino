@@ -121,7 +121,7 @@ void SPI_out2data(uint8_t data0,uint8_t data1)
       digitalWriteFast(SS,LOW);
       SPI.transfer(data0);
       digitalWriteFast(SS,HIGH);
-      _delay_us(2);
+      _delay_us(6);
       digitalWriteFast(SS,LOW);
       SPI.transfer(data1);
       digitalWriteFast(SS,HIGH);
@@ -182,7 +182,7 @@ void loop(void)
   {
     loopcounter0 = 0;
      loopcounter1++;
-    if (loopcounter1 == 0xFF)
+    if (loopcounter1 == 0x4FF)
     {
       loopcounter1 = 0;
       digitalWrite(LOOPLED,!(digitalRead(LOOPLED)));
@@ -191,7 +191,7 @@ void loop(void)
       ADC_Wert0 = analogRead(A0);
       ADC_Wert1 = analogRead(A1);
       uint8_t adcdiff = (ADC_Wert0 > ADC_Wert1) ? (ADC_Wert0 - ADC_Wert1) : (ADC_Wert1 - ADC_Wert0);
-      transferindex &= 0x07;
+      //transferindex &= 0x07;
 
       out_data[1] = transferindex; // data sync  
       out_data[3] = ADC_Wert0;      // data 0
@@ -203,8 +203,9 @@ void loop(void)
 
       SPI_out2data(out_data[2*paketnummer],out_data[2*paketnummer+1]);
       
-
+      out_data[6]++;
       transferindex++;
+      
       /*   
       //     u8g2.firstPage();
       //    digitalWriteFast(23,!(digitalRead(23)));
