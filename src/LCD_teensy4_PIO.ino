@@ -98,6 +98,14 @@ volatile uint8_t in_data[BUFSIZE];
 
 uint8_t paketnummer = 0;
 
+// Define SOFT-SPI pin assignments
+const int MOSI_PIN = 11; // MOSI
+const int MISO_PIN = 12; // MISO
+const int SCK_PIN = 13;  // SCK
+const int SS_PIN = 10;   // SS
+#define SOFT_BUFSIZE  8
+
+
 ADC *adc = new ADC(); // adc object
 
 
@@ -115,6 +123,38 @@ void setADC0(uint8_t avrg, uint8_t res)
 
 }
 
+uint8_t softspiTransfer(uint8_t data) 
+{
+  uint8_t receivedData = 0;
+
+  // Pull SS low to select the slave
+  digitalWrite(SS_PIN, LOW);
+
+  // Send and receive 8 bits
+  for (int i = SOFT_BUFSIZE; i >= 0; i--) {
+    // Set MOSI according to the data bit
+    digitalWrite(MOSI_PIN, (data & (1 << i)) ? HIGH : LOW);
+
+    // Pulse the clock
+    digitalWrite(SCK_PIN, HIGH);
+
+    // Read MISO
+    if (digitalRead(MISO_PIN)) {
+      receivedData |= (1 << i);
+    }
+
+    // Pulse the clock
+    digitalWrite(SCK_PIN, LOW);
+  }
+
+  // Pull SS high to release the slave
+  digitalWrite(SS_PIN, HIGH);
+
+  return receivedData;
+}
+
+
+
 void SPI_out2data(uint8_t data0,uint8_t data1)
 {
    SPI.beginTransaction(SPISettings(CLOCKSPEED, MSBFIRST, SPI_MODE0));
@@ -122,6 +162,7 @@ void SPI_out2data(uint8_t data0,uint8_t data1)
       SPI.transfer(data0);
       digitalWriteFast(SS,HIGH);
       _delay_us(6);
+      //_delay_ms(40);
       digitalWriteFast(SS,LOW);
       SPI.transfer(data1);
       digitalWriteFast(SS,HIGH);
@@ -137,6 +178,15 @@ void setup(void)
   pinMode(A0,INPUT);
   pinMode(A1,INPUT);
 
+// Initialize Soft-SPI pins
+  pinMode(MOSI_PIN, OUTPUT);
+  pinMode(MISO_PIN, INPUT);
+  pinMode(SCK_PIN, OUTPUT);
+  pinMode(SS_PIN, OUTPUT);
+   // Set initial states
+  digitalWrite(SS_PIN, HIGH);
+  digitalWrite(SCK_PIN, LOW);
+  
   SPI.begin(); 
   
   // codes fuer 1. byte
