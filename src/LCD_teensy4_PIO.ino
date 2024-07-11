@@ -44,8 +44,8 @@
 #include <ADC.h>
 #include <util/delay.h>
 
-#include <Wire.h>
-#include "rgb_lcd.h"
+//#include <Wire.h>
+//#include "rgb_lcd.h"
 /*
 #endif
 #ifdef U8X8_HAVE_HW_I2C
@@ -82,7 +82,7 @@ uint8_t wertcounter = 0;
 uint8_t wert = 0;
 
 // LCD
-rgb_lcd lcd;
+//rgb_lcd lcd;
 
 const int colorR = 255;
 const int colorG = 0;
@@ -250,6 +250,20 @@ void setup(void)
   adc->adc0->setReference(ADC_REFERENCE::REF_3V3);
   */
   setADC0(2,8);
+
+    // groove LCD
+  // set up the LCD's number of columns and rows:
+  //  lcd.begin(16, 2);
+
+    //lcd.setRGB(colorR, colorG, colorB);
+
+    // Print a message to the LCD.
+    //lcd.print("hello, world!");
+
+
+
+
+
   /*
   u8g2.begin();
   u8g2.setFont(u8g2_font_helvB12_tr);
@@ -279,6 +293,8 @@ void loop(void)
      loopcounter1++;
     if (loopcounter1 == 0x4FF)
     {
+     // lcd.setCursor(0, 1);
+      // lcd.print(millis() / 1000);
       loopcounter1 = 0;
       digitalWrite(LOOPLED,!(digitalRead(LOOPLED)));
       wertcounter++;
