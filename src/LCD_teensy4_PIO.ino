@@ -43,6 +43,9 @@
 #include <SPI.h>
 #include <ADC.h>
 #include <util/delay.h>
+
+#include <Wire.h>
+#include "rgb_lcd.h"
 /*
 #endif
 #ifdef U8X8_HAVE_HW_I2C
@@ -78,6 +81,13 @@ uint8_t h = 60;
 uint8_t wertcounter = 0;
 uint8_t wert = 0;
 
+// LCD
+rgb_lcd lcd;
+
+const int colorR = 255;
+const int colorG = 0;
+const int colorB = 0;
+
 
 // SPI
 #define BUFSIZE 8
@@ -108,7 +118,7 @@ const int SS_PIN = 10;   // SS
 
 ADC *adc = new ADC(); // adc object
 
-
+#define SOFT 0
 
 #define CLOCKSPEED 4000000
 
@@ -123,28 +133,31 @@ void setADC0(uint8_t avrg, uint8_t res)
 
 }
 
-uint8_t softspiTransfer(uint8_t data) 
+uint8_t softspitransfer(uint8_t data) 
 {
   uint8_t receivedData = 0;
-
+  uint8_t spidelay = 2;
   // Pull SS low to select the slave
   digitalWrite(SS_PIN, LOW);
-
+  _delay_us(spidelay);
   // Send and receive 8 bits
   for (int i = SOFT_BUFSIZE; i >= 0; i--) {
     // Set MOSI according to the data bit
+    _delay_us(2*spidelay);
     digitalWrite(MOSI_PIN, (data & (1 << i)) ? HIGH : LOW);
-
+    _delay_us(spidelay);
     // Pulse the clock
     digitalWrite(SCK_PIN, HIGH);
-
+    _delay_us(spidelay);
     // Read MISO
+    /*
     if (digitalRead(MISO_PIN)) {
       receivedData |= (1 << i);
     }
-
+    */
     // Pulse the clock
     digitalWrite(SCK_PIN, LOW);
+    _delay_us(1);
   }
 
   // Pull SS high to release the slave
@@ -153,6 +166,20 @@ uint8_t softspiTransfer(uint8_t data)
   return receivedData;
 }
 
+void SOFT_SPI_out2data(uint8_t data0,uint8_t data1)
+{
+      digitalWriteFast(SS,LOW);
+      softspitransfer(data0);
+      digitalWriteFast(SS,HIGH);
+      _delay_us(10);
+      //_delay_ms(40);
+      
+      digitalWriteFast(SS,LOW);
+      softspitransfer(data1);
+      digitalWriteFast(SS,HIGH);
+      
+
+}
 
 
 void SPI_out2data(uint8_t data0,uint8_t data1)
@@ -170,6 +197,22 @@ void SPI_out2data(uint8_t data0,uint8_t data1)
 
 }
 
+/*
+void SPI_out2data4(uint8_t code,uint8_t data)
+{
+   SPI.beginTransaction(SPISettings(CLOCKSPEED, MSBFIRST, SPI_MODE0));
+      digitalWriteFast(SS,LOW);
+      SPI.transfer(data0);
+      digitalWriteFast(SS,HIGH);
+      _delay_us(6);
+      //_delay_ms(40);
+      digitalWriteFast(SS,LOW);
+      SPI.transfer(data1);
+      digitalWriteFast(SS,HIGH);
+      SPI.endTransaction();
+
+}
+*/
 void setup(void) 
 {
   pinMode(23,OUTPUT);
@@ -187,8 +230,10 @@ void setup(void)
   digitalWrite(SS_PIN, HIGH);
   digitalWrite(SCK_PIN, LOW);
   
-  SPI.begin(); 
-  
+  if (SOFT == 0)
+  {
+    SPI.begin(); 
+  }
   // codes fuer 1. byte
   out_data[0] = 0xFF; // sync
   out_data[2] = 101;
@@ -198,7 +243,7 @@ void setup(void)
   // ADC
   /*
   adc->adc0->setAveraging(2); // set number of averages
-  adc->adc0->setResolution(8); // set bits of resolution
+  adc->adc0->setResolution(10); // set bits of resolution
   adc->adc0->setConversionSpeed(ADC_CONVERSION_SPEED::LOW_SPEED); // change the conversion speed
   adc->adc0->setSamplingSpeed(ADC_SAMPLING_SPEED::MED_SPEED); // change the sampling speed
   adc->adc0->recalibrate();
@@ -239,21 +284,31 @@ void loop(void)
       wertcounter++;
 
       ADC_Wert0 = analogRead(A0);
-      ADC_Wert1 = analogRead(A1);
+      ADC_Wert1 = adc->adc0->analogRead(A1);
       uint8_t adcdiff = (ADC_Wert0 > ADC_Wert1) ? (ADC_Wert0 - ADC_Wert1) : (ADC_Wert1 - ADC_Wert0);
       //transferindex &= 0x07;
 
       out_data[1] = transferindex; // data sync  
       out_data[3] = ADC_Wert0;      // data 0
-      out_data[5] = ADC_Wert1;      // data 1
+      out_data[5] = ADC_Wert1>>2;      // data 1
       out_data[7] = adcdiff;        // data 2
 
 
       paketnummer = transferindex%4; // pos im paket 01 23 45 67
 
-      SPI_out2data(out_data[2*paketnummer],out_data[2*paketnummer+1]);
-      
-      out_data[6]++;
+      if (SOFT)
+      {
+         SOFT_SPI_out2data(out_data[2*paketnummer],out_data[2*paketnummer+1]);
+      }
+      else
+      {
+          SPI_out2data(out_data[2*paketnummer],out_data[2*paketnummer+1]);
+      }
+      //
+     
+
+
+      //out_data[6]++;
       transferindex++;
       
       /*   
