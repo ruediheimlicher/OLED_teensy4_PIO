@@ -305,7 +305,7 @@ void loop(void)
   {
     loopcounter0 = 0;
      loopcounter1++;
-    if (loopcounter1 == 0xFF)
+    if (loopcounter1 == 0xF)
     {
       loopcounter1 = 0;
       digitalWrite(LOOPLED,!(digitalRead(LOOPLED)));
