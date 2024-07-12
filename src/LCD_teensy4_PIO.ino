@@ -45,7 +45,15 @@
 #include <util/delay.h>
 
 #include <Wire.h>
-#include "rgb_lcd.h"
+#include <LiquidCrystal_I2C.h>
+LiquidCrystal_I2C lcd(0x27, 20, 4);
+//#include "rgb_lcd.h"
+
+//rgb_lcd grove_lcd;
+const int colorR = 255;
+const int colorG = 0;
+const int colorB = 0;
+
 /*
 #endif
 #ifdef U8X8_HAVE_HW_I2C
@@ -82,11 +90,8 @@ uint8_t wertcounter = 0;
 uint8_t wert = 0;
 
 // LCD
-rgb_lcd lcd;
+//rgb_lcd lcd;
 
-const int colorR = 255;
-const int colorG = 0;
-const int colorB = 0;
 
 
 // SPI
@@ -249,7 +254,11 @@ void setup(void)
   adc->adc0->recalibrate();
   adc->adc0->setReference(ADC_REFERENCE::REF_3V3);
   */
-  setADC0(2,8);
+
+  setADC0(8,8);
+
+
+
   /*
   u8g2.begin();
   u8g2.setFont(u8g2_font_helvB12_tr);
@@ -267,6 +276,26 @@ void setup(void)
   u8g2.setFont(u8g2_font_helvB12_tr);
   u8g2.firstPage();
   */
+
+  // LCD groove
+   /*
+  // set up the LCD's number of columns and rows:
+    lcd.begin(16, 2);
+
+    lcd.setRGB(colorR, colorG, colorB);
+
+    // Print a message to the LCD.
+    lcd.print("hello, world!");
+    _delay_ms(1000);
+    lcd.clear();
+*/
+
+lcd.init();
+lcd.backlight();
+lcd.setCursor(0, 0);
+lcd.print("setup");
+_delay_ms(1000);
+lcd.clear();
 }
 
 void loop(void) 
@@ -284,17 +313,47 @@ void loop(void)
       wertcounter++;
 
       ADC_Wert0 = analogRead(A0);
-      ADC_Wert1 = adc->adc0->analogRead(A1);
+      ADC_Wert1 = analogRead(A1);
+      //ADC_Wert1 = analogRead(A1);
       uint8_t adcdiff = (ADC_Wert0 > ADC_Wert1) ? (ADC_Wert0 - ADC_Wert1) : (ADC_Wert1 - ADC_Wert0);
       //transferindex &= 0x07;
 
+      //lcd.setCursor(0,0);
+      //lcd.print(ADC_Wert0);
+      //lcd.setCursor(6,0);
+      //lcd.print((ADC_Wert1 & 0xFF00)>>8);
+      //lcd.print((ADC_Wert1));
       out_data[1] = transferindex; // data sync  
       out_data[3] = ADC_Wert0;      // data 0
-      out_data[5] = ADC_Wert1>>2;      // data 1
+      out_data[5] = ADC_Wert1;      // data 1
       out_data[7] = adcdiff;        // data 2
+
+      _delay_ms(2);
+      lcd.setCursor(0, 0);
+      lcd.print(out_data[0]);
+      lcd.print(": ");
+      lcd.print(out_data[1]);
+      lcd.setCursor(0, 1);
+      lcd.print(out_data[2]);
+      lcd.print(": ");
+      lcd.print(out_data[3]);
+      
+      lcd.setCursor(0, 2);
+      lcd.print(out_data[4]);
+      lcd.print(": ");
+      lcd.print(out_data[5]);
+      lcd.setCursor(0, 3);
+      lcd.print(out_data[6]);
+      lcd.print(": ");
+      lcd.print(out_data[7]);
+      
 
 
       paketnummer = transferindex%4; // pos im paket 01 23 45 67
+
+      
+
+
 
       if (SOFT)
       {
@@ -306,9 +365,9 @@ void loop(void)
       }
       //
      
+     
 
-
-      //out_data[6]++;
+            //out_data[6]++;
       transferindex++;
       
       /*   
