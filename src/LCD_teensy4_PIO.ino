@@ -194,7 +194,6 @@ void SPI_out2data(uint8_t data0,uint8_t data1)
       SPI.transfer(data0);
       digitalWriteFast(SS,HIGH);
       _delay_us(6);
-      //_delay_ms(40);
       digitalWriteFast(SS,LOW);
       SPI.transfer(data1);
       digitalWriteFast(SS,HIGH);
@@ -302,11 +301,11 @@ void loop(void)
 {
   
   loopcounter0++;
-  if(loopcounter0 == 0x1FFF)
+  if(loopcounter0 == 0xFF)
   {
     loopcounter0 = 0;
      loopcounter1++;
-    if (loopcounter1 == 0x4FF)
+    if (loopcounter1 == 0xFF)
     {
       loopcounter1 = 0;
       digitalWrite(LOOPLED,!(digitalRead(LOOPLED)));
@@ -328,24 +327,28 @@ void loop(void)
       out_data[5] = ADC_Wert1;      // data 1
       out_data[7] = adcdiff;        // data 2
 
-      _delay_ms(2);
+      char buf[4];
       lcd.setCursor(0, 0);
       lcd.print(out_data[0]);
       lcd.print(": ");
-      lcd.print(out_data[1]);
+      sprintf(buf,"%3d",out_data[1]);
+      lcd.print(buf);
       lcd.setCursor(0, 1);
       lcd.print(out_data[2]);
       lcd.print(": ");
-      lcd.print(out_data[3]);
+      sprintf(buf,"%3d",out_data[3]);
+      lcd.print(buf);
       
       lcd.setCursor(0, 2);
       lcd.print(out_data[4]);
       lcd.print(": ");
-      lcd.print(out_data[5]);
+      sprintf(buf,"%3d",out_data[5]);
+      lcd.print(buf);
       lcd.setCursor(0, 3);
       lcd.print(out_data[6]);
       lcd.print(": ");
-      lcd.print(out_data[7]);
+      sprintf(buf,"%3d",out_data[7]);
+      lcd.print(buf);
       
 
 
