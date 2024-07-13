@@ -125,7 +125,11 @@ ADC *adc = new ADC(); // adc object
 
 #define SOFT 0
 
-#define CLOCKSPEED 2000000
+// teensy4
+#define CLOCKSPEED 4000000
+
+// teensy3.2//
+//#define CLOCKSPEED 2000000
 
 void setADC0(uint8_t avrg, uint8_t res)
 {
