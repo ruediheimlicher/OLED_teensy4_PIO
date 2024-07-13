@@ -125,7 +125,7 @@ ADC *adc = new ADC(); // adc object
 
 #define SOFT 0
 
-#define CLOCKSPEED 4000000
+#define CLOCKSPEED 2000000
 
 void setADC0(uint8_t avrg, uint8_t res)
 {
@@ -295,6 +295,7 @@ lcd.setCursor(0, 0);
 lcd.print("setup");
 _delay_ms(1000);
 lcd.clear();
+lcd.display();
 }
 
 void loop(void) 
