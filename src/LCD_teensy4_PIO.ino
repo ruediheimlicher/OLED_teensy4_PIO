@@ -306,11 +306,11 @@ void loop(void)
 {
   
   loopcounter0++;
-  if(loopcounter0 == 0xFF)
+  if(loopcounter0 == 0x2FF)
   {
     loopcounter0 = 0;
      loopcounter1++;
-    if (loopcounter1 == 0xF)
+    if (loopcounter1 == 0xFF)
     {
       loopcounter1 = 0;
       digitalWrite(LOOPLED,!(digitalRead(LOOPLED)));
@@ -332,6 +332,7 @@ void loop(void)
       out_data[5] = ADC_Wert1;      // data 1
       out_data[7] = adcdiff;        // data 2
 
+      /*
       char buf[4];
       lcd.setCursor(0, 0);
       lcd.print(out_data[0]);
@@ -354,7 +355,7 @@ void loop(void)
       lcd.print(": ");
       sprintf(buf,"%3d",out_data[7]);
       lcd.print(buf);
-      
+      */
 
 
       paketnummer = transferindex%4; // pos im paket 01 23 45 67
@@ -365,16 +366,110 @@ void loop(void)
 
       if (SOFT)
       {
-         SOFT_SPI_out2data(out_data[2*paketnummer],out_data[2*paketnummer+1]);
+         //SOFT_SPI_out2data(out_data[2*paketnummer],out_data[2*paketnummer+1]);
       }
       else
       {
-          SPI_out2data(out_data[2*paketnummer],out_data[2*paketnummer+1]);
+      //    SPI_out2data(out_data[2*paketnummer],out_data[2*paketnummer+1]);
       }
-      //
-     
-     
+     char buf[4];
 
+        lcd.setCursor(0, 0);
+        lcd.print(101);
+        lcd.print(": ");
+        sprintf(buf,"%3d",ADC_Wert0);
+        lcd.print(buf);
+        SPI_out2data(101,ADC_Wert0);
+
+        lcd.setCursor(0, 1);
+        lcd.print(102);
+        lcd.print(": ");
+        sprintf(buf,"%3d",ADC_Wert1);
+        lcd.print(buf);
+        SPI_out2data(102,ADC_Wert1);
+
+        lcd.setCursor(0, 2);
+        lcd.print(103);
+        lcd.print(": ");
+        sprintf(buf,"%3d",adcdiff);
+        lcd.print(buf);
+        SPI_out2data(103,adcdiff);
+
+
+     uint8_t trans = transferindex % 2;
+      trans = 4;
+
+    
+     switch (trans)
+     {
+      case 0:
+      {
+        lcd.setCursor(0, 0);
+        lcd.print(101);
+        lcd.print(": ");
+        sprintf(buf,"%3d",ADC_Wert0);
+        lcd.print(buf);
+        SPI_out2data(101,ADC_Wert0);
+     }break;
+
+     case 1:
+     {
+       
+        lcd.setCursor(0, 1);
+        lcd.print(102);
+        lcd.print(": ");
+        sprintf(buf,"%3d",ADC_Wert1);
+        lcd.print(buf);
+        SPI_out2data(102,ADC_Wert1);
+
+        
+
+     }break;
+
+     case 2:
+     {
+       lcd.setCursor(0, 2);
+        lcd.print(103);
+        lcd.print(": ");
+        sprintf(buf,"%3d",adcdiff);
+        lcd.print(buf);
+        SPI_out2data(103,adcdiff);
+     }break;
+
+     }// switch
+
+     /*
+     if((transferindex % 3) == 0)
+     {
+        lcd.setCursor(0, 0);
+        lcd.print(101);
+        lcd.print(": ");
+        sprintf(buf,"%3d",ADC_Wert0);
+        lcd.print(buf);
+        SPI_out2data(101,ADC_Wert0);
+     }
+     else
+     {
+        //_delay_us(1000);
+        //_delay_ms(2);
+        lcd.setCursor(0, 1);
+        lcd.print(102);
+        lcd.print(": ");
+        sprintf(buf,"%3d",ADC_Wert1);
+        lcd.print(buf);
+        SPI_out2data(102,ADC_Wert1);
+
+        _delay_ms(1);
+        lcd.setCursor(0, 2);
+        lcd.print(103);
+        lcd.print(": ");
+        sprintf(buf,"%3d",adcdiff);
+        lcd.print(buf);
+        SPI_out2data(103,adcdiff);
+
+
+     }
+      */
             //out_data[6]++;
       transferindex++;
       
